@@ -1,33 +1,45 @@
 <script setup lang="ts">
 import socialData from '../../data/social.json'
+import { useIntersectionObserver } from '../../composables/useIntersectionObserver'
 
 const links = socialData.links.filter((l) => l.url)
+const { targetRef, isVisible } = useIntersectionObserver()
 </script>
 
 <template>
   <section
     id="social"
-    class="py-20 px-4 bg-[var(--color-bg-secondary)]"
+    class="relative py-20 px-4 bg-[var(--color-bg-secondary)] overflow-hidden"
   >
-    <div class="max-w-2xl mx-auto text-center">
-      <h2 class="text-3xl font-bold text-[var(--color-text)] mb-2">联系我</h2>
-      <div class="w-16 h-1 bg-orange-500 rounded mx-auto mb-10" />
+    <!-- Decorative background dots -->
+    <div
+      class="absolute inset-0 pointer-events-none opacity-[0.04]"
+      style="background-image: radial-gradient(circle, #FF6B00 1px, transparent 1px); background-size: 28px 28px;"
+    />
+
+    <div
+      ref="targetRef"
+      class="max-w-2xl mx-auto text-center relative z-10 transition-all duration-700"
+      :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
+    >
+      <h2 class="text-3xl font-bold gradient-text mb-2">联系我</h2>
+      <div class="w-16 h-1 bg-gradient-to-r from-orange-500 to-yellow-400 rounded mx-auto mb-10" />
 
       <div class="flex justify-center gap-6 flex-wrap">
         <a
           v-for="link in links"
           :key="link.platform"
-          :href="link.isEmail ? link.url : link.url"
+          :href="link.url"
           :target="link.isEmail ? undefined : '_blank'"
           :rel="link.isEmail ? undefined : 'noopener noreferrer'"
-          class="flex flex-col items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-xl p-4"
+          class="flex flex-col items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-2xl p-4"
         >
-          <div class="w-14 h-14 rounded-full bg-[var(--color-surface)] border border-[var(--color-border)] flex items-center justify-center group-hover:border-orange-500 group-hover:bg-orange-500/10 transition-all duration-200">
+          <div class="w-16 h-16 rounded-full glass flex items-center justify-center group-hover:border-orange-500/60 group-hover:shadow-[0_0_20px_rgba(255,107,0,0.3)] transition-all duration-300 group-hover:scale-110">
             <!-- GitHub icon -->
             <svg
               v-if="link.icon === 'github'"
               xmlns="http://www.w3.org/2000/svg"
-              class="w-7 h-7 text-[var(--color-text)] group-hover:text-orange-500 transition-colors"
+              class="w-8 h-8 text-gray-300 group-hover:text-orange-500 transition-colors"
               viewBox="0 0 24 24"
               fill="currentColor"
               :aria-label="`${link.platform} profile`"
@@ -38,7 +50,7 @@ const links = socialData.links.filter((l) => l.url)
             <svg
               v-else-if="link.icon === 'email'"
               xmlns="http://www.w3.org/2000/svg"
-              class="w-7 h-7 text-[var(--color-text)] group-hover:text-orange-500 transition-colors"
+              class="w-8 h-8 text-gray-300 group-hover:text-orange-500 transition-colors"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -51,7 +63,7 @@ const links = socialData.links.filter((l) => l.url)
             <svg
               v-else
               xmlns="http://www.w3.org/2000/svg"
-              class="w-7 h-7 text-[var(--color-text)] group-hover:text-orange-500 transition-colors"
+              class="w-8 h-8 text-gray-300 group-hover:text-orange-500 transition-colors"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"

@@ -4,6 +4,7 @@ import ThemeToggle from '../ui/ThemeToggle.vue'
 import HamburgerMenu from './HamburgerMenu.vue'
 
 const activeSection = ref('hero')
+const scrollProgress = ref(0)
 
 const navLinks = [
   { id: 'hero', label: '首页' },
@@ -19,6 +20,12 @@ let observers: IntersectionObserver[] = []
 function scrollTo(id: string) {
   const el = document.getElementById(id)
   if (el) el.scrollIntoView({ behavior: 'smooth' })
+}
+
+function updateScrollProgress() {
+  const scrollTop = window.scrollY
+  const docHeight = document.documentElement.scrollHeight - window.innerHeight
+  scrollProgress.value = docHeight > 0 ? (scrollTop / docHeight) * 100 : 0
 }
 
 onMounted(() => {
@@ -38,26 +45,35 @@ onMounted(() => {
     observer.observe(el)
     observers.push(observer)
   })
+
+  window.addEventListener('scroll', updateScrollProgress, { passive: true })
+  updateScrollProgress()
 })
 
 onUnmounted(() => {
   observers.forEach((o) => o.disconnect())
   observers = []
+  window.removeEventListener('scroll', updateScrollProgress)
 })
 </script>
 
 <template>
   <header
-    class="fixed top-0 left-0 right-0 z-50 bg-[#0D1B2A] border-b border-yellow-500/40 shadow-lg"
+    class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[#0D1B2A]/80 border-b border-yellow-500/20 shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
   >
-    <div class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+    <!-- Scroll progress bar -->
+    <div
+      class="absolute top-0 left-0 h-0.5 bg-gradient-to-r from-orange-500 to-yellow-400 transition-all duration-100"
+      :style="{ width: scrollProgress + '%' }"
+    />
+
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
       <!-- Logo -->
       <button
         @click="scrollTo('hero')"
         class="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded"
         aria-label="Go to top"
       >
-        <!-- Konoha leaf SVG -->
         <svg
           width="28"
           height="28"
@@ -91,14 +107,19 @@ onUnmounted(() => {
           :key="link.id"
           href="#"
           @click.prevent="scrollTo(link.id)"
-          class="px-3 py-1.5 rounded text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
+          class="relative px-3 py-1.5 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded"
           :class="
             activeSection === link.id
-              ? 'text-orange-500 bg-orange-500/10'
-              : 'text-gray-300 hover:text-orange-400 hover:bg-orange-500/10'
+              ? 'text-orange-500'
+              : 'text-gray-300 hover:text-orange-400'
           "
         >
           {{ link.label }}
+          <!-- Active bottom border indicator -->
+          <span
+            v-if="activeSection === link.id"
+            class="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-0.5 bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full"
+          />
         </a>
       </nav>
 

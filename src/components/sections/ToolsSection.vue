@@ -56,11 +56,11 @@ const tools = [
 ]
 
 const visibleCards = ref<boolean[]>(tools.map(() => false))
-const cardRefs = ref<(HTMLElement | null)[]>([])
+const wrapperRefs = ref<(HTMLElement | null)[]>([])
 let observers: IntersectionObserver[] = []
 
 onMounted(() => {
-  cardRefs.value.forEach((el, i) => {
+  wrapperRefs.value.forEach((el, i) => {
     if (!el) return
     const obs = new IntersectionObserver(
       (entries) => {
@@ -93,32 +93,33 @@ onUnmounted(() => {
       <div class="w-16 h-1 bg-gradient-to-r from-orange-500 to-yellow-400 rounded mb-10" />
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-        <RouterLink
+        <div
           v-for="(tool, i) in tools"
           :key="tool.route"
-          :to="tool.route"
-          :ref="(el) => { cardRefs[i] = el as HTMLElement | null }"
-          class="group flex items-start gap-4 bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-border)] card-hover transition-all duration-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500"
-          :class="[
-            visibleCards[i] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
-            tool.border,
-            `hover:shadow-lg ${tool.shadow}`
-          ]"
+          :ref="(el) => { wrapperRefs[i] = el as HTMLElement | null }"
+          class="transition-all duration-700"
+          :class="visibleCards[i] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
         >
-          <!-- Large emoji icon with gradient bg -->
-          <div
-            class="text-4xl flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
-            :class="tool.accent"
+          <RouterLink
+            :to="tool.route"
+            class="group flex items-start gap-4 bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-border)] card-hover transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 block"
+            :class="[tool.border, `hover:shadow-lg ${tool.shadow}`]"
           >
-            {{ tool.icon }}
-          </div>
-          <div>
-            <h3 class="font-semibold text-[var(--color-text)] group-hover:text-orange-500 transition-colors mb-1">
-              {{ tool.title }}
-            </h3>
-            <p class="text-sm text-[var(--color-text-muted)]">{{ tool.desc }}</p>
-          </div>
-        </RouterLink>
+            <!-- Large emoji icon with gradient bg -->
+            <div
+              class="text-4xl flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
+              :class="tool.accent"
+            >
+              {{ tool.icon }}
+            </div>
+            <div>
+              <h3 class="font-semibold text-[var(--color-text)] group-hover:text-orange-500 transition-colors mb-1">
+                {{ tool.title }}
+              </h3>
+              <p class="text-sm text-[var(--color-text-muted)]">{{ tool.desc }}</p>
+            </div>
+          </RouterLink>
+        </div>
       </div>
     </div>
   </section>

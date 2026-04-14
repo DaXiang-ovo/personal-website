@@ -1,0 +1,16 @@
+{
+  "projects": [
+    {
+      "name": "DataEase 日期分割插件",
+      "description": "为 DataEase 开发的自定义图表插件，支持按日期维度分割展示数据",
+      "tags": ["Java", "Vue", "DataEase", "数据可视化"],
+      "url": null
+    },
+    {
+      "name": "个人主页",
+      "description": "基于 Vue 3 + Vite 构建的个人网站，火影忍者主题，含多个实用工具模块",
+      "tags": ["Vue 3", "TypeScript", "Tailwind CSS", "GitHub Pages"],
+      "url": "https://DaXiang-ovo.github.io/personal-website"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "links": [
+    {
+      "platform": "GitHub",
+      "url": "https://github.com/DaXiang-ovo",
+      "icon": "github",
+      "isEmail": false
+    },
+    {
+      "platform": "Email",
+      "url": "mailto:dongxundlut@163.com",
+      "icon": "email",
+      "isEmail": true
+    }
+  ]
+}

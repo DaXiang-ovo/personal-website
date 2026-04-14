@@ -1,0 +1,67 @@
+@import 'tailwindcss';
+
+/* Naruto theme CSS custom properties */
+:root {
+  --color-primary: #FF6B00;
+  --color-primary-light: #FF8C38;
+  --color-bg: #F5F0E8;
+  --color-bg-secondary: #EDE8DF;
+  --color-surface: #FFFFFF;
+  --color-text: #1A1A1A;
+  --color-text-muted: #555555;
+  --color-accent: #FFD700;
+  --color-border: #D4C9B0;
+  --color-navy: #0D1B2A;
+}
+
+.dark {
+  --color-primary: #FF8C38;
+  --color-primary-light: #FFB070;
+  --color-bg: #0D1B2A;
+  --color-bg-secondary: #1A2E45;
+  --color-surface: #162436;
+  --color-text: #F5F0E8;
+  --color-text-muted: #A0A8B0;
+  --color-accent: #FFD700;
+  --color-border: #2A3F55;
+  --color-navy: #0D1B2A;
+}
+
+/* Smooth theme transitions */
+*, *::before, *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-bg-secondary);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-primary);
+  border-radius: 3px;
+}
+
+/* Naruto scroll border utility */
+.scroll-border {
+  border: 2px solid var(--color-accent);
+  border-radius: 4px;
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.3);
+}
+
+/* Chakra glow effect */
+.chakra-glow {
+  box-shadow: 0 0 20px rgba(255, 107, 0, 0.4);
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  font-family: 'Inter', system-ui, sans-serif;
+}

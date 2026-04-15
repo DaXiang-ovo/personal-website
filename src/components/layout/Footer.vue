@@ -3,14 +3,14 @@
 
 <template>
   <footer class="relative bg-[#0D1B2A] py-10 overflow-hidden">
-    <!-- Gradient top border -->
-    <div class="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-orange-500 to-transparent" />
+    <!-- Animated gradient top border -->
+    <div class="absolute top-0 left-0 right-0 h-px gradient-border-animated" />
 
     <!-- Subtle background gradient -->
     <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(ellipse at bottom center, rgba(255,107,0,0.05) 0%, transparent 70%);" />
 
     <div class="max-w-6xl mx-auto px-4 flex flex-col items-center gap-4 relative z-10">
-      <!-- Konoha leaf decoration -->
+      <!-- Konoha leaf decoration with hover spin -->
       <svg
         width="28"
         height="28"
@@ -18,7 +18,7 @@
         fill="none"
         xmlns="http://www.w3.org/2000/svg"
         aria-hidden="true"
-        class="opacity-70"
+        class="opacity-70 transition-transform duration-500 hover:rotate-180 cursor-pointer"
       >
         <path
           d="M14 2 C8 2, 3 7, 3 13 C3 18, 6 22, 10 24 L14 26 L18 24 C22 22, 25 18, 25 13 C25 7, 20 2, 14 2 Z"

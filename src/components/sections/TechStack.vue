@@ -2,7 +2,6 @@
 import { ref, onMounted, onUnmounted } from 'vue'
 import techData from '../../data/techstack.json'
 
-// Per-card visibility for stagger animation
 const visibleCards = ref<boolean[]>(techData.categories.map(() => false))
 const cardRefs = ref<(HTMLElement | null)[]>([])
 let observers: IntersectionObserver[] = []
@@ -43,8 +42,8 @@ onUnmounted(() => {
     />
 
     <div class="max-w-6xl mx-auto relative z-10">
-      <!-- Section title -->
-      <h2 class="text-3xl font-bold gradient-text mb-2">技术栈</h2>
+      <!-- Section title with animated gradient -->
+      <h2 class="text-3xl font-bold gradient-text-animated mb-2">技术栈</h2>
       <div class="flex items-center gap-2 mb-10">
         <div class="w-16 h-1 bg-gradient-to-r from-orange-500 to-yellow-400 rounded" />
         <div class="w-4 h-1 bg-yellow-500 rounded" />
@@ -57,10 +56,10 @@ onUnmounted(() => {
           v-for="(category, i) in techData.categories"
           :key="category.name"
           :ref="(el) => { cardRefs[i] = el as HTMLElement | null }"
-          class="rounded-2xl p-5 border card-hover transition-all duration-700 dark:glass"
+          class="rounded-2xl p-5 border card-hover-enhanced shine-effect transition-all duration-700 dark:glass"
           :class="[
             visibleCards[i] ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8',
-            'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-orange-500/50 hover:shadow-[0_8px_30px_rgba(255,107,0,0.15)]'
+            'bg-[var(--color-surface)] border-[var(--color-border)] hover:border-orange-500/50'
           ]"
         >
           <h3 class="text-orange-500 font-semibold text-sm uppercase tracking-wider mb-4">
@@ -76,16 +75,18 @@ onUnmounted(() => {
                 v-if="item.iconUrl"
                 :src="item.iconUrl"
                 :alt="`${item.name} icon`"
-                class="w-6 h-6 object-contain flex-shrink-0 transition-transform duration-200 group-hover/item:scale-125"
+                class="w-6 h-6 object-contain flex-shrink-0 transition-all duration-300 group-hover/item:scale-125 group-hover/item:rotate-12"
+                style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);"
               />
               <span
                 v-else
-                class="w-6 h-6 flex-shrink-0 rounded bg-orange-500/20 text-orange-500 text-xs flex items-center justify-center font-bold transition-transform duration-200 group-hover/item:scale-125"
+                class="w-6 h-6 flex-shrink-0 rounded bg-orange-500/20 text-orange-500 text-xs flex items-center justify-center font-bold transition-all duration-300 group-hover/item:scale-125 group-hover/item:rotate-12"
+                style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);"
                 aria-hidden="true"
               >
                 {{ item.name.charAt(0) }}
               </span>
-              <span class="text-[var(--color-text)] text-sm">{{ item.name }}</span>
+              <span class="text-[var(--color-text)] text-sm transition-colors duration-200 group-hover/item:text-orange-500">{{ item.name }}</span>
             </li>
           </ul>
         </div>

@@ -22,7 +22,7 @@ const { targetRef, isVisible } = useIntersectionObserver()
       class="max-w-2xl mx-auto text-center relative z-10 transition-all duration-700"
       :class="isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'"
     >
-      <h2 class="text-3xl font-bold gradient-text mb-2">联系我</h2>
+      <h2 class="text-3xl font-bold gradient-text-animated mb-2">联系我</h2>
       <div class="w-16 h-1 bg-gradient-to-r from-orange-500 to-yellow-400 rounded mx-auto mb-10" />
 
       <div class="flex justify-center gap-6 flex-wrap">
@@ -32,14 +32,14 @@ const { targetRef, isVisible } = useIntersectionObserver()
           :href="link.url"
           :target="link.isEmail ? undefined : '_blank'"
           :rel="link.isEmail ? undefined : 'noopener noreferrer'"
-          class="flex flex-col items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-2xl p-4"
+          class="flex flex-col items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded-2xl p-4 hover-shake"
         >
-          <div class="w-16 h-16 rounded-full glass flex items-center justify-center group-hover:border-orange-500/60 group-hover:shadow-[0_0_20px_rgba(255,107,0,0.3)] transition-all duration-300 group-hover:scale-110">
+          <div class="social-icon-ring w-16 h-16 rounded-full glass flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_25px_rgba(255,107,0,0.4)]">
             <!-- GitHub icon -->
             <svg
               v-if="link.icon === 'github'"
               xmlns="http://www.w3.org/2000/svg"
-              class="w-8 h-8 text-gray-300 group-hover:text-orange-500 transition-colors"
+              class="w-8 h-8 text-gray-300 group-hover:text-orange-500 transition-colors duration-300"
               viewBox="0 0 24 24"
               fill="currentColor"
               :aria-label="`${link.platform} profile`"
@@ -50,7 +50,7 @@ const { targetRef, isVisible } = useIntersectionObserver()
             <svg
               v-else-if="link.icon === 'email'"
               xmlns="http://www.w3.org/2000/svg"
-              class="w-8 h-8 text-gray-300 group-hover:text-orange-500 transition-colors"
+              class="w-8 h-8 text-gray-300 group-hover:text-orange-500 transition-colors duration-300"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -63,7 +63,7 @@ const { targetRef, isVisible } = useIntersectionObserver()
             <svg
               v-else
               xmlns="http://www.w3.org/2000/svg"
-              class="w-8 h-8 text-gray-300 group-hover:text-orange-500 transition-colors"
+              class="w-8 h-8 text-gray-300 group-hover:text-orange-500 transition-colors duration-300"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -72,7 +72,7 @@ const { targetRef, isVisible } = useIntersectionObserver()
               <path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
             </svg>
           </div>
-          <span class="text-sm text-[var(--color-text-muted)] group-hover:text-orange-500 transition-colors">
+          <span class="text-sm text-[var(--color-text-muted)] group-hover:text-orange-500 transition-colors duration-300">
             {{ link.platform }}
           </span>
         </a>
@@ -80,3 +80,27 @@ const { targetRef, isVisible } = useIntersectionObserver()
     </div>
   </section>
 </template>
+
+<style scoped>
+.social-icon-ring {
+  position: relative;
+}
+
+.social-icon-ring::before {
+  content: '';
+  position: absolute;
+  inset: -3px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  background: linear-gradient(135deg, rgba(255,107,0,0.3), rgba(255,215,0,0.3)) border-box;
+  -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.group:hover .social-icon-ring::before {
+  opacity: 1;
+}
+</style>

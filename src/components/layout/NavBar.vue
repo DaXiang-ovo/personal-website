@@ -59,11 +59,11 @@ onUnmounted(() => {
 
 <template>
   <header
-    class="fixed top-0 left-0 right-0 z-50 backdrop-blur-md bg-[#0D1B2A]/80 border-b border-yellow-500/20 shadow-[0_4px_20px_rgba(0,0,0,0.3)]"
+    class="fixed top-0 left-0 right-0 z-50 backdrop-blur-xl bg-[#0D1B2A]/75 border-b border-yellow-500/15 shadow-[0_4px_30px_rgba(0,0,0,0.4)]"
   >
     <!-- Scroll progress bar -->
     <div
-      class="absolute top-0 left-0 h-0.5 bg-gradient-to-r from-orange-500 to-yellow-400 transition-all duration-100"
+      class="absolute top-0 left-0 h-0.5 bg-gradient-to-r from-orange-500 via-yellow-400 to-orange-500 transition-all duration-150"
       :style="{ width: scrollProgress + '%' }"
     />
 
@@ -71,7 +71,7 @@ onUnmounted(() => {
       <!-- Logo -->
       <button
         @click="scrollTo('hero')"
-        class="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded"
+        class="flex items-center gap-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded group"
         aria-label="Go to top"
       >
         <svg
@@ -81,6 +81,7 @@ onUnmounted(() => {
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
           aria-hidden="true"
+          class="transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12"
         >
           <path
             d="M14 2 C8 2, 3 7, 3 13 C3 18, 6 22, 10 24 L14 26 L18 24 C22 22, 25 18, 25 13 C25 7, 20 2, 14 2 Z"
@@ -97,7 +98,7 @@ onUnmounted(() => {
           <line x1="14" y1="16" x2="9" y2="20" stroke="#0D1B2A" stroke-width="1" />
           <line x1="14" y1="16" x2="19" y2="20" stroke="#0D1B2A" stroke-width="1" />
         </svg>
-        <span class="text-orange-500 font-bold text-lg tracking-wide hidden sm:block">DaXiang</span>
+        <span class="text-orange-500 font-bold text-lg tracking-wide hidden sm:block transition-colors group-hover:text-yellow-400">DaXiang</span>
       </button>
 
       <!-- Desktop nav links -->
@@ -107,19 +108,14 @@ onUnmounted(() => {
           :key="link.id"
           href="#"
           @click.prevent="scrollTo(link.id)"
-          class="relative px-3 py-1.5 text-sm font-medium transition-colors duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded"
-          :class="
+          class="nav-link-underline relative px-3 py-1.5 text-sm font-medium transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 rounded"
+          :class="[
             activeSection === link.id
-              ? 'text-orange-500'
+              ? 'text-orange-500 active'
               : 'text-gray-300 hover:text-orange-400'
-          "
+          ]"
         >
           {{ link.label }}
-          <!-- Active bottom border indicator -->
-          <span
-            v-if="activeSection === link.id"
-            class="absolute bottom-0 left-1/2 -translate-x-1/2 w-4/5 h-0.5 bg-gradient-to-r from-orange-500 to-yellow-400 rounded-full"
-          />
         </a>
       </nav>
 

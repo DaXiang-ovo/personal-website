@@ -89,7 +89,7 @@ onUnmounted(() => {
     class="py-20 px-4 bg-[var(--color-bg)]"
   >
     <div class="max-w-5xl mx-auto">
-      <h2 class="text-3xl font-bold gradient-text mb-2">工具</h2>
+      <h2 class="text-3xl font-bold gradient-text-animated mb-2">工具</h2>
       <div class="w-16 h-1 bg-gradient-to-r from-orange-500 to-yellow-400 rounded mb-10" />
 
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
@@ -102,12 +102,13 @@ onUnmounted(() => {
         >
           <RouterLink
             :to="tool.route"
-            class="group flex items-start gap-4 bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-border)] card-hover transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 block"
+            class="group flex items-start gap-4 bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-border)] card-hover-enhanced shine-effect transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 block"
             :class="[tool.border, `hover:shadow-lg ${tool.shadow}`]"
           >
             <!-- Icon: image or emoji fallback -->
             <div
-              class="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-110"
+              class="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden transition-all duration-300 group-hover:scale-110 group-hover:rotate-3"
+              style="transition-timing-function: cubic-bezier(0.34, 1.56, 0.64, 1);"
               :class="tool.accent"
             >
               <img

@@ -1,0 +1,12 @@
+---
+import MinecraftTracker from '@/components/tools/MinecraftTracker';
+import { siteConfig } from '@constants/site-config';
+import Layout from '@layouts/Layout.astro';
+
+const title = `Minecraft Tracker | ${siteConfig.title}`;
+const description = '查看 Minecraft 最新版本更新';
+---
+
+<Layout title={title} description={description}>
+  <MinecraftTracker client:load />
+</Layout>

@@ -1,0 +1,12 @@
+---
+import DeltaForceStats from '@/components/tools/DeltaForceStats';
+import { siteConfig } from '@constants/site-config';
+import Layout from '@layouts/Layout.astro';
+
+const title = `三角洲行动 | ${siteConfig.title}`;
+const description = '三角洲行动个人战绩展示';
+---
+
+<Layout title={title} description={description}>
+  <DeltaForceStats client:load />
+</Layout>

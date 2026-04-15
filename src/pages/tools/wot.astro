@@ -1,0 +1,12 @@
+---
+import WoTStats from '@/components/tools/WoTStats';
+import { siteConfig } from '@constants/site-config';
+import Layout from '@layouts/Layout.astro';
+
+const title = `坦克世界欧服 | ${siteConfig.title}`;
+const description = '坦克世界欧服战绩查询';
+---
+
+<Layout title={title} description={description}>
+  <WoTStats client:load />
+</Layout>

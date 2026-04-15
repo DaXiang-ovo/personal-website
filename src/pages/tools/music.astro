@@ -1,0 +1,12 @@
+---
+import MusicPlayer from '@/components/tools/MusicPlayer';
+import { siteConfig } from '@constants/site-config';
+import Layout from '@layouts/Layout.astro';
+
+const title = `陈奕迅音乐播放器 | ${siteConfig.title}`;
+const description = '陈奕迅歌曲播放器';
+---
+
+<Layout title={title} description={description}>
+  <MusicPlayer client:load />
+</Layout>

@@ -1,0 +1,55 @@
+---
+import HomeSider from '@components/layout/HomeSider.astro';
+import Cover from '@components/ui/cover/Cover.astro';
+import { CONTENT_PADDING } from '@constants/layout';
+import { siteConfig } from '@constants/site-config';
+import Layout from '@layouts/Layout.astro';
+import TwoColumnLayout from '@layouts/TwoColumnLayout.astro';
+
+const title = `工具箱 | ${siteConfig.title}`;
+const description = '各种有趣的小工具合集';
+
+const tools = [
+  { title: 'Minecraft Tracker', href: '/tools/minecraft', desc: '查看 Minecraft 最新版本更新', color: '#5A8A3A', iconType: 'minecraft' },
+  { title: '陈奕迅音乐播放器', href: '/tools/music', desc: '陈奕迅歌曲播放器', color: '#A855F7', iconType: 'music' },
+  { title: '三角洲行动', href: '/tools/deltaforce', desc: '个人战绩展示', color: '#00FF41', iconType: 'deltaforce' },
+  { title: '火影忍者手游', href: '/tools/naruto', desc: '战绩与战力展示', color: '#FF6B00', iconType: 'naruto' },
+  { title: '坦克世界欧服', href: '/tools/wot', desc: '欧服战绩查询', color: '#F59E0B', iconType: 'wot' },
+];
+---
+
+<Layout title={title} description={description}>
+  <TwoColumnLayout>
+    <Cover slot="cover" title="工具箱" />
+    <HomeSider slot="sider" />
+    <div class={`bg-gradient-start shadow-box tablet:shadow-none flex flex-col overflow-hidden ${CONTENT_PADDING.standard}`}>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {tools.map(tool => (
+          <a href={tool.href} class="group flex items-start gap-4 p-5 rounded-2xl border border-[var(--card-border)] bg-[var(--card-bg)] hover:border-[color-mix(in_srgb,var(--primary),transparent_50%)] transition-all duration-300 hover:shadow-lg no-underline">
+            <div class="flex-shrink-0 w-12 h-12 rounded-xl flex items-center justify-center transition-transform duration-300 group-hover:scale-110" style={`background: ${tool.color}20;`}>
+              {tool.iconType === 'minecraft' && (
+                <img src="/img/tools/minecraft.png" alt="Minecraft" class="w-10 h-10 rounded-lg" />
+              )}
+              {tool.iconType === 'music' && (
+                <div class="w-10 h-10 rounded-lg bg-purple-500/20 flex items-center justify-center text-xl">🎵</div>
+              )}
+              {tool.iconType === 'deltaforce' && (
+                <img src="/img/tools/deltaforce.png" alt="三角洲行动" class="w-10 h-10 rounded-lg" />
+              )}
+              {tool.iconType === 'naruto' && (
+                <img src="/img/tools/naruto.png" alt="火影忍者" class="w-10 h-10 rounded-lg" />
+              )}
+              {tool.iconType === 'wot' && (
+                <img src="/img/tools/wot.png" alt="坦克世界" class="w-10 h-10 rounded-lg" />
+              )}
+            </div>
+            <div>
+              <h3 class="font-semibold text-[var(--text-color)] group-hover:text-[var(--primary)] transition-colors text-sm mb-1">{tool.title}</h3>
+              <p class="text-xs text-[var(--text-color-secondary)]">{tool.desc}</p>
+            </div>
+          </a>
+        ))}
+      </div>
+    </div>
+  </TwoColumnLayout>
+</Layout>

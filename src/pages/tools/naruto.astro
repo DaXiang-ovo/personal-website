@@ -1,0 +1,12 @@
+---
+import NarutoMobileStats from '@/components/tools/NarutoMobileStats';
+import { siteConfig } from '@constants/site-config';
+import Layout from '@layouts/Layout.astro';
+
+const title = `火影忍者手游 | ${siteConfig.title}`;
+const description = '火影忍者手游战绩与战力展示';
+---
+
+<Layout title={title} description={description}>
+  <NarutoMobileStats client:load />
+</Layout>

@@ -1,39 +1,45 @@
 {
   "categories": [
     {
-      "name": "数据处理",
+      "name": "数据处理 & ETL",
       "items": [
         { "name": "Python", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" },
-        { "name": "SQL", "iconUrl": null },
+        { "name": "SQL", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/azuresqldatabase/azuresqldatabase-original.svg" },
+        { "name": "Shell", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg" },
         { "name": "Apache Spark", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apachespark/apachespark-original.svg" },
         { "name": "Pandas", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/pandas/pandas-original.svg" }
       ]
     },
     {
-      "name": "数据仓库",
+      "name": "数据仓库 & 存储",
       "items": [
-        { "name": "MaxCompute", "iconUrl": null },
+        { "name": "Snowflake", "iconUrl": "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/snowflake.svg" },
+        { "name": "MaxCompute", "iconUrl": "https://img.alicdn.com/imgextra/i3/O1CN01XxD6Xf1rEFfXCBpqT_!!6000000005599-55-tps-56-56.svg" },
         { "name": "Hologres", "iconUrl": null },
-        { "name": "Apache Hive", "iconUrl": null },
+        { "name": "Apache Hive", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/apachekafka/apachekafka-original.svg" },
         { "name": "PostgreSQL", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
-        { "name": "MySQL", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" }
+        { "name": "MySQL", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/mysql/mysql-original.svg" },
+        { "name": "AWS S3", "iconUrl": "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/amazons3.svg" }
       ]
     },
     {
-      "name": "数据工具",
+      "name": "数据平台 & 工具",
       "items": [
         { "name": "DataWorks", "iconUrl": null },
         { "name": "DataEase", "iconUrl": null },
-        { "name": "Apache Airflow", "iconUrl": null },
+        { "name": "Tableau", "iconUrl": "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/tableau.svg" },
+        { "name": "MicroStrategy", "iconUrl": null },
+        { "name": "Apache Airflow", "iconUrl": "https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/apacheairflow.svg" },
         { "name": "Jupyter", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/jupyter/jupyter-original.svg" }
       ]
     },
     {
-      "name": "开发工具",
+      "name": "开发 & 运维",
       "items": [
-        { "name": "Git", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" },
+        { "name": "Git / GitHub", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/git/git-original.svg" },
         { "name": "Linux", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linux/linux-original.svg" },
         { "name": "Docker", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/docker/docker-original.svg" },
+        { "name": "CI/CD", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/githubactions/githubactions-original.svg" },
         { "name": "VS Code", "iconUrl": "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/vscode/vscode-original.svg" }
       ]
     }

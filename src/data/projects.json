@@ -1,14 +1,32 @@
 {
   "projects": [
     {
-      "name": "DataEase 日期分割插件",
-      "description": "为 DataEase 开发的自定义图表插件，支持按日期维度分割展示数据",
+      "name": "辉瑞医学信息网站数据平台",
+      "description": "基于 Snowflake + MicroStrategy，为辉瑞医学信息网站团队构建全链路数据分析平台，覆盖流量域星型模型建设、多维数据立方体及交互式仪表板开发，替代 80% 手工报表",
+      "tags": ["Snowflake", "MicroStrategy", "Kimball建模", "AWS S3", "Python", "SQL"],
+      "url": null
+    },
+    {
+      "name": "多源数据湖 ETL 管道建设",
+      "description": "负责从 Veeva、Pfizer MDM、WeChat、Adobe Web 等多源系统到 Snowflake 的全链路数据管道，主导 ODS→ADS 分层架构设计，实现 TB 级数据 T+0 级质量阻断",
+      "tags": ["Snowflake", "ETL", "Python", "Shell", "数据质量", "AWS S3"],
+      "url": null
+    },
+    {
+      "name": "市场数据自助分析平台重构",
+      "description": "升级原有市场数据平台，设计中间视图语义层，对 300+ 核心字段标准化命名，开发高性能 Tableau Datasource，将报表响应时间从分钟级降至秒级",
+      "tags": ["Tableau", "Snowflake", "SQL", "语义层设计", "性能优化"],
+      "url": null
+    },
+    {
+      "name": "DataEase 日期分割图表插件",
+      "description": "为 DataEase 开发的自定义图表插件，支持按日期维度分割展示数据，已集成至生产环境",
       "tags": ["Java", "Vue", "DataEase", "数据可视化"],
       "url": null
     },
     {
       "name": "个人主页",
-      "description": "基于 Vue 3 + Vite 构建的个人网站，火影忍者主题，含多个实用工具模块",
+      "description": "基于 Vue 3 + Vite 构建的个人网站，火影忍者主题，含 Minecraft 版本追踪、陈奕迅播放器、坦克世界战绩查询等工具模块",
       "tags": ["Vue 3", "TypeScript", "Tailwind CSS", "GitHub Pages"],
       "url": "https://DaXiang-ovo.github.io/personal-website"
     }

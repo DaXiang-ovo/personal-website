@@ -6,52 +6,52 @@ const tools = [
   {
     title: 'Minecraft Tracker',
     route: '/tools/minecraft',
-    icon: '🟫',
+    iconUrl: 'https://www.minecraft.net/etc.clientlibs/minecraft/clientlibs/main/resources/img/minecraft-creeper-face.png',
+    iconFallback: '⛏',
     desc: '查看 Minecraft 最新版本更新',
-    gradient: 'from-green-600/20 to-green-400/10',
     border: 'hover:border-green-500/60',
     shadow: 'hover:shadow-green-500/15',
-    accent: 'bg-green-500/20 text-green-400',
+    accent: 'bg-green-500/20',
   },
   {
     title: '陈奕迅音乐播放器',
     route: '/tools/music',
-    icon: '🎵',
+    iconUrl: null,
+    iconFallback: '🎵',
     desc: '陈奕迅歌曲播放器',
-    gradient: 'from-pink-600/20 to-rose-400/10',
     border: 'hover:border-pink-500/60',
     shadow: 'hover:shadow-pink-500/15',
-    accent: 'bg-pink-500/20 text-pink-400',
+    accent: 'bg-pink-500/20',
   },
   {
     title: '三角洲行动',
     route: '/tools/deltaforce',
-    icon: '🎖️',
+    iconUrl: 'https://cdn.akamai.steamstatic.com/steam/apps/2507950/capsule_sm_120.jpg',
+    iconFallback: '🎖️',
     desc: '个人战绩展示',
-    gradient: 'from-slate-600/20 to-slate-400/10',
     border: 'hover:border-slate-400/60',
     shadow: 'hover:shadow-slate-400/15',
-    accent: 'bg-slate-500/20 text-slate-300',
+    accent: 'bg-slate-500/20',
   },
   {
     title: '火影忍者手游',
     route: '/tools/naruto',
-    icon: '🍃',
+    iconUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/b5/c5/c5/b5c5c5c5-0000-0000-0000-000000000000/AppIcon-0-0-1x_U007emarketing-0-7-0-85-220.png/246x0w.webp',
+    iconFallback: '🍃',
     desc: '战绩与战力展示',
-    gradient: 'from-orange-600/20 to-orange-400/10',
     border: 'hover:border-orange-500/60',
     shadow: 'hover:shadow-orange-500/15',
-    accent: 'bg-orange-500/20 text-orange-400',
+    accent: 'bg-orange-500/20',
   },
   {
     title: '坦克世界欧服',
     route: '/tools/wot',
-    icon: '🛡️',
+    iconUrl: 'https://cdn.akamai.steamstatic.com/steam/apps/342200/capsule_sm_120.jpg',
+    iconFallback: '🛡️',
     desc: '欧服战绩查询',
-    gradient: 'from-yellow-600/20 to-yellow-400/10',
     border: 'hover:border-yellow-500/60',
     shadow: 'hover:shadow-yellow-500/15',
-    accent: 'bg-yellow-500/20 text-yellow-400',
+    accent: 'bg-yellow-500/20',
   },
 ]
 
@@ -105,12 +105,19 @@ onUnmounted(() => {
             class="group flex items-start gap-4 bg-[var(--color-surface)] rounded-2xl p-6 border border-[var(--color-border)] card-hover transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 block"
             :class="[tool.border, `hover:shadow-lg ${tool.shadow}`]"
           >
-            <!-- Large emoji icon with gradient bg -->
+            <!-- Icon: image or emoji fallback -->
             <div
-              class="text-4xl flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center transition-transform duration-200 group-hover:scale-110"
+              class="flex-shrink-0 w-14 h-14 rounded-2xl flex items-center justify-center overflow-hidden transition-transform duration-200 group-hover:scale-110"
               :class="tool.accent"
             >
-              {{ tool.icon }}
+              <img
+                v-if="tool.iconUrl"
+                :src="tool.iconUrl"
+                :alt="tool.title"
+                class="w-10 h-10 object-cover rounded-xl"
+                @error="($event.target as HTMLImageElement).style.display='none'"
+              />
+              <span v-else class="text-3xl">{{ tool.iconFallback }}</span>
             </div>
             <div>
               <h3 class="font-semibold text-[var(--color-text)] group-hover:text-orange-500 transition-colors mb-1">

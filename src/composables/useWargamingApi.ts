@@ -135,8 +135,8 @@ export async function searchPlayer(username: string): Promise<WoTPlayerStats> {
   const damage_dealt: number = allStats.damage_dealt ?? 0
   const frags: number = allStats.frags ?? 0
 
-  // Step 3: vehicle stats
-  const tanksUrl = `${BASE_URL}/account/tanks/?application_id=${APP_ID}&account_id=${account_id}&fields=tank_id,statistics`
+  // Step 3: vehicle stats - request damage_dealt via extra field
+  const tanksUrl = `${BASE_URL}/account/tanks/?application_id=${APP_ID}&account_id=${account_id}&fields=tank_id,statistics&extra=statistics.all`
   res = await fetchWithTimeout(tanksUrl)
 
   let vehicles: VehicleStat[] = []

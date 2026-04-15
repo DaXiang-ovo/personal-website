@@ -10,7 +10,7 @@ const loading = ref(false)
 const playerData = ref<WoTPlayerStats | null>(null)
 const errorMsg = ref<string | null>(null)
 const notFound = ref(false)
-const activeTab = ref<"overview" | "vehicles">("overview")
+const activeTab = ref<"vehicles" | "overview">("vehicles")
 
 function wn8Color(wn8: number): string {
   if (wn8 < 300) return "#CD3333"
@@ -140,8 +140,8 @@ onMounted(() => { doSearch() })
 
         <!-- Tabs -->
         <div class="flex gap-1 mb-4">
-          <button @click="activeTab = 'overview'" class="tab-btn" :class="{ active: activeTab === 'overview' }">📊 总览</button>
           <button @click="activeTab = 'vehicles'" class="tab-btn" :class="{ active: activeTab === 'vehicles' }">🚗 车辆战绩</button>
+          <button @click="activeTab = 'overview'" class="tab-btn" :class="{ active: activeTab === 'overview' }">📊 总览数据</button>
         </div>
 
         <!-- Tab: Overview -->
@@ -244,3 +244,4 @@ onMounted(() => { doSearch() })
 .tab-btn:hover { background: #222; color: #C0C0C0; }
 .tab-btn.active { background: #2A2A2A; border-color: #555; color: #E0E0E0; }
 </style>
+

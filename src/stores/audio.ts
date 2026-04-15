@@ -105,8 +105,21 @@ export const useAudioStore = defineStore('audio', () => {
     }
   }
 
+  // Error counter to prevent infinite skip loop when files are missing
+  const errorCount = ref(0)
+  const MAX_CONSECUTIVE_ERRORS = 3
+
   function onAudioError() {
-    next()
+    errorCount.value++
+    if (errorCount.value <= MAX_CONSECUTIVE_ERRORS) {
+      next()
+    }
+    // Reset error count after a delay
+    setTimeout(() => { errorCount.value = 0 }, 3000)
+  }
+
+  function resetErrors() {
+    errorCount.value = 0
   }
 
   return {
@@ -129,5 +142,6 @@ export const useAudioStore = defineStore('audio', () => {
     jumpTo,
     generateShuffle,
     onAudioError,
+    resetErrors,
   }
 })

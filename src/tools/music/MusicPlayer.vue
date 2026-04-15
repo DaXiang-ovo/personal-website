@@ -70,6 +70,7 @@ function handleEnded() {
 
 function handleError() {
   isReady.value = false
+  // Only skip if not already at max errors - prevents infinite loop when files missing
   store.onAudioError()
 }
 
@@ -86,8 +87,9 @@ function handleCanPlay() {
   isReady.value = true
 }
 
-// When track changes, load new src
-watch(() => store.currentIndex, () => {
+// When track changes via store.next()/prev(), sync audio element
+watch(() => store.currentIndex, (newIdx, oldIdx) => {
+  if (newIdx === oldIdx) return
   const audio = audioRef.value
   if (!audio) return
   isReady.value = false
@@ -97,6 +99,7 @@ watch(() => store.currentIndex, () => {
   if (track) {
     audio.src = track.src
     audio.load()
+    // Only auto-play if we were already playing (e.g. song ended → next)
     if (store.isPlaying) {
       audio.play().catch(() => {})
     }
@@ -245,7 +248,7 @@ const bgStyle = computed(() => {
             <li
               v-for="(track, idx) in store.tracks"
               :key="track.id"
-              @click="store.jumpTo(idx); store.play(); audioRef?.play().catch(()=>{})"
+              @click="() => { store.jumpTo(idx); const audio = audioRef; if(audio) { audio.src = store.tracks[idx].src; audio.load(); audio.play().then(() => store.play()).catch(() => {}); } }"
               class="playlist-item px-3 py-2.5 cursor-pointer rounded-lg flex items-center gap-3"
               :class="{ 'playlist-active': idx === store.currentIndex }"
             >

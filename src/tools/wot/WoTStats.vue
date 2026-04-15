@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, onMounted, computed } from "vue"
 import { RouterLink } from "vue-router"
 import { searchPlayer, type WoTPlayerStats, type VehicleStat } from "../../composables/useWargamingApi"
@@ -10,7 +10,7 @@ const loading = ref(false)
 const playerData = ref<WoTPlayerStats | null>(null)
 const errorMsg = ref<string | null>(null)
 const notFound = ref(false)
-const activeTab = ref<"vehicles" | "overview">("vehicles")
+const activeTab = ref<"vehicles" | "battles">("vehicles")
 
 function wn8Color(wn8: number): string {
   if (wn8 < 300) return "#CD3333"
@@ -141,37 +141,7 @@ onMounted(() => { doSearch() })
         <!-- Tabs -->
         <div class="flex gap-1 mb-4">
           <button @click="activeTab = 'vehicles'" class="tab-btn" :class="{ active: activeTab === 'vehicles' }">🚗 车辆战绩</button>
-          <button @click="activeTab = 'overview'" class="tab-btn" :class="{ active: activeTab === 'overview' }">📊 总览数据</button>
-        </div>
-
-        <!-- Tab: Overview -->
-        <div v-if="activeTab === 'overview'">
-          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
-            <div class="stat-box">
-              <div class="stat-label">总场次</div>
-              <div class="stat-val">{{ playerData.battles.toLocaleString() }}</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-label">胜率</div>
-              <div class="stat-val">{{ pct(playerData.winRate) }}</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-label">平均伤害</div>
-              <div class="stat-val">{{ playerData.avgDamage.toLocaleString() }}</div>
-            </div>
-            <div class="stat-box">
-              <div class="stat-label">平均击杀</div>
-              <div class="stat-val">{{ playerData.avgFrags.toFixed(2) }}</div>
-            </div>
-          </div>
-
-          <!-- WN8 color legend -->
-          <div class="steel-card p-4">
-            <div class="font-mono text-xs mb-3" style="color:#888;">WN8 评级说明</div>
-            <div class="flex flex-wrap gap-2">
-              <span v-for="[label, color] in [['很差 &lt;300','#CD3333'],['较差 &lt;900','#CD7700'],['平均 &lt;1650','#CCB800'],['良好 &lt;2450','#4D7326'],['优秀 &lt;3000','#4099BF'],['超神 3000+','#B24CCC']]" :key="label" class="font-mono text-xs px-2 py-1 rounded" :style="`color:${color}; border: 1px solid ${color}40; background: ${color}15`">{{ label }}</span>
-            </div>
-          </div>
+          <button @click="activeTab = 'battles'" class="tab-btn" :class="{ active: activeTab === 'battles' }">📊 场次详情</button>
         </div>
 
         <!-- Tab: Vehicles -->
@@ -187,7 +157,7 @@ onMounted(() => { doSearch() })
                     <th class="px-4 py-2 text-left" style="color:#888;">车辆</th>
                     <th class="px-4 py-2 text-right" style="color:#888;">场次</th>
                     <th class="px-4 py-2 text-right" style="color:#888;">胜率</th>
-                    <th class="px-4 py-2 text-right" style="color:#888;">均伤</th>
+                    <th class="px-4 py-2 text-right" style="color:#888;">场均伤害</th>
                     <th class="px-4 py-2 text-right" style="color:#888;">WN8</th>
                   </tr>
                 </thead>
@@ -204,6 +174,72 @@ onMounted(() => { doSearch() })
             </div>
           </div>
           <div v-else class="text-center py-8 font-mono text-sm" style="color:#555;">暂无车辆数据</div>
+        </div>
+
+        <!-- Tab: Battle Details -->
+        <div v-if="activeTab === 'battles'">
+          <!-- Overview stats grid -->
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            <div class="stat-box">
+              <div class="stat-label">总场次</div>
+              <div class="stat-val">{{ playerData.battles.toLocaleString() }}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">胜率</div>
+              <div class="stat-val">{{ pct(playerData.winRate) }}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">场均伤害</div>
+              <div class="stat-val">{{ playerData.avgDamage.toLocaleString() }}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">场均击杀</div>
+              <div class="stat-val">{{ playerData.avgFrags.toFixed(2) }}</div>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+            <div class="stat-box">
+              <div class="stat-label">场均侦查</div>
+              <div class="stat-val">{{ playerData.avgSpotted.toFixed(2) }}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">场均经验</div>
+              <div class="stat-val">{{ playerData.avgXp.toLocaleString() }}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">存活率</div>
+              <div class="stat-val">{{ pct(playerData.survivalRate) }}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">命中率</div>
+              <div class="stat-val">{{ pct(playerData.hitRate) }}</div>
+            </div>
+          </div>
+
+          <!-- Derived stats -->
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+            <div class="stat-box">
+              <div class="stat-label">总胜场</div>
+              <div class="stat-val">{{ playerData.wins.toLocaleString() }}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">总伤害</div>
+              <div class="stat-val">{{ playerData.damage_dealt.toLocaleString() }}</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-label">总击杀</div>
+              <div class="stat-val">{{ playerData.frags.toLocaleString() }}</div>
+            </div>
+          </div>
+
+          <!-- WN8 color legend -->
+          <div class="steel-card p-4">
+            <div class="font-mono text-xs mb-3" style="color:#888;">WN8 评级说明</div>
+            <div class="flex flex-wrap gap-2">
+              <span v-for="[label, color] in [['很差 &lt;300','#CD3333'],['较差 &lt;900','#CD7700'],['平均 &lt;1650','#CCB800'],['良好 &lt;2450','#4D7326'],['优秀 &lt;3000','#4099BF'],['超神 3000+','#B24CCC']]" :key="label" class="font-mono text-xs px-2 py-1 rounded" :style="`color:${color}; border: 1px solid ${color}40; background: ${color}15`">{{ label }}</span>
+            </div>
+          </div>
         </div>
 
       </div>
@@ -240,8 +276,7 @@ onMounted(() => { doSearch() })
 .stat-label { font-size: 11px; color: #555; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; font-family: "Courier New", monospace; }
 .stat-val { font-size: 1.4rem; font-weight: bold; color: #C0C0C0; font-family: "Courier New", monospace; }
 
-.tab-btn { padding: 8px 20px; font-mono: true; font-size: 13px; border: 1px solid #333; background: #1A1A1A; color: #888; cursor: pointer; border-radius: 6px; transition: all 0.15s; font-family: "Courier New", monospace; }
+.tab-btn { padding: 8px 20px; font-size: 13px; border: 1px solid #333; background: #1A1A1A; color: #888; cursor: pointer; border-radius: 6px; transition: all 0.15s; font-family: "Courier New", monospace; }
 .tab-btn:hover { background: #222; color: #C0C0C0; }
 .tab-btn.active { background: #2A2A2A; border-color: #555; color: #E0E0E0; }
 </style>
-

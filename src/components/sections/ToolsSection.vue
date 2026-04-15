@@ -6,7 +6,7 @@ const tools = [
   {
     title: 'Minecraft Tracker',
     route: '/tools/minecraft',
-    iconUrl: 'https://www.minecraft.net/etc.clientlibs/minecraft/clientlibs/main/resources/img/minecraft-creeper-face.png',
+    iconUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Purple211/v4/22/d9/2d/22d92dca-ecec-60da-a0fc-df0d35040447/AppIcon-0-0-1x_U007emarketing-0-10-0-85-220.png/100x100bb.jpg',
     iconFallback: '⛏',
     desc: '查看 Minecraft 最新版本更新',
     border: 'hover:border-green-500/60',
@@ -16,7 +16,7 @@ const tools = [
   {
     title: '陈奕迅音乐播放器',
     route: '/tools/music',
-    iconUrl: null,
+    iconUrl: 'https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/icons/music-note-beamed.svg',
     iconFallback: '🎵',
     desc: '陈奕迅歌曲播放器',
     border: 'hover:border-pink-500/60',
@@ -36,7 +36,7 @@ const tools = [
   {
     title: '火影忍者手游',
     route: '/tools/naruto',
-    iconUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/b5/c5/c5/b5c5c5c5-0000-0000-0000-000000000000/AppIcon-0-0-1x_U007emarketing-0-7-0-85-220.png/246x0w.webp',
+    iconUrl: 'https://is1-ssl.mzstatic.com/image/thumb/Purple221/v4/28/5c/3e/285c3e1a-c678-24fb-a6e2-d82ff05f985f/AppIcon-0-0-1x_U007emarketing-0-8-0-85-220.png/100x100bb.jpg',
     iconFallback: '🍃',
     desc: '战绩与战力展示',
     border: 'hover:border-orange-500/60',
@@ -46,7 +46,7 @@ const tools = [
   {
     title: '坦克世界欧服',
     route: '/tools/wot',
-    iconUrl: 'https://cdn.akamai.steamstatic.com/steam/apps/342200/capsule_sm_120.jpg',
+    iconUrl: 'https://cdn.akamai.steamstatic.com/steam/apps/1407200/capsule_sm_120.jpg',
     iconFallback: '🛡️',
     desc: '欧服战绩查询',
     border: 'hover:border-yellow-500/60',

@@ -28,6 +28,11 @@ export interface WoTPlayerStats {
   winRate: number
   avgDamage: number
   avgFrags: number
+  avgSpotted: number
+  avgXp: number
+  survived: number
+  survivalRate: number
+  hitRate: number
   wn8: number
   vehicles: VehicleStat[]
   cachedAt: number
@@ -69,7 +74,6 @@ async function fetchVehicleNames(tankIds: number[]): Promise<Map<number, string>
   const nameMap = new Map<number, string>()
   if (tankIds.length === 0) return nameMap
 
-  // Wargaming API allows up to 100 tank_ids per request
   const chunks: number[][] = []
   for (let i = 0; i < tankIds.length; i += 100) {
     chunks.push(tankIds.slice(i, i + 100))
@@ -134,9 +138,14 @@ export async function searchPlayer(username: string): Promise<WoTPlayerStats> {
   const wins: number = allStats.wins ?? 0
   const damage_dealt: number = allStats.damage_dealt ?? 0
   const frags: number = allStats.frags ?? 0
+  const spotted: number = allStats.spotted ?? 0
+  const xp: number = allStats.xp ?? 0
+  const survived_battles: number = allStats.survived_battles ?? 0
+  const hits: number = allStats.hits ?? 0
+  const shots: number = allStats.shots ?? 0
 
-  // Step 3: vehicle stats - request damage_dealt via extra field
-  const tanksUrl = `${BASE_URL}/account/tanks/?application_id=${APP_ID}&account_id=${account_id}&fields=tank_id,statistics&extra=statistics.all`
+  // Step 3: vehicle stats - use tanks/stats endpoint for full data
+  const tanksUrl = `${BASE_URL}/tanks/stats/?application_id=${APP_ID}&account_id=${account_id}&fields=tank_id,all`
   res = await fetchWithTimeout(tanksUrl)
 
   let vehicles: VehicleStat[] = []
@@ -145,7 +154,7 @@ export async function searchPlayer(username: string): Promise<WoTPlayerStats> {
     const tanksData = await res.json()
     const tankList: Array<{
       tank_id: number
-      statistics: {
+      all: {
         battles: number
         wins: number
         damage_dealt: number
@@ -155,7 +164,7 @@ export async function searchPlayer(username: string): Promise<WoTPlayerStats> {
       }
     }> = tanksData.data?.[account_id] ?? []
 
-    const activeTanks = tankList.filter((t) => t.statistics.battles > 0)
+    const activeTanks = tankList.filter((t) => t.all && t.all.battles > 0)
 
     // Fetch vehicle names
     const tankIds = activeTanks.map((t) => t.tank_id)
@@ -176,7 +185,7 @@ export async function searchPlayer(username: string): Promise<WoTPlayerStats> {
 
     vehicles = activeTanks
       .map((t) => {
-        const s = t.statistics
+        const s = t.all
         const b = s.battles
         const rawStats: VehicleRawStats = {
           battles: b,
@@ -203,12 +212,22 @@ export async function searchPlayer(username: string): Promise<WoTPlayerStats> {
         }
       })
       .sort((a, b) => b.battles - a.battles)
-      .slice(0, 10)
+      .slice(0, 20)
   }
 
-  // Overall WN8
+  // Overall WN8 - use per-vehicle weighted calculation if vehicle data available
   let overallWn8 = 0
-  if (battles > 0) {
+  if (vehicles.length > 0) {
+    let totalWeightedWn8 = 0
+    let totalBattles = 0
+    for (const v of vehicles) {
+      if (v.wn8 > 0) {
+        totalWeightedWn8 += v.wn8 * v.battles
+        totalBattles += v.battles
+      }
+    }
+    overallWn8 = totalBattles > 0 ? totalWeightedWn8 / totalBattles : 0
+  } else if (battles > 0) {
     const rawStats: VehicleRawStats = {
       battles,
       wins,
@@ -231,6 +250,11 @@ export async function searchPlayer(username: string): Promise<WoTPlayerStats> {
     winRate: battles > 0 ? wins / battles : 0,
     avgDamage: battles > 0 ? Math.round(damage_dealt / battles) : 0,
     avgFrags: battles > 0 ? frags / battles : 0,
+    avgSpotted: battles > 0 ? spotted / battles : 0,
+    avgXp: battles > 0 ? Math.round(xp / battles) : 0,
+    survived: survived_battles,
+    survivalRate: battles > 0 ? survived_battles / battles : 0,
+    hitRate: shots > 0 ? hits / shots : 0,
     wn8: overallWn8,
     vehicles,
     cachedAt: Date.now(),

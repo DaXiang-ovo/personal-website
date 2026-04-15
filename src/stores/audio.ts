@@ -29,14 +29,14 @@ export const useAudioStore = defineStore('audio', () => {
   const shuffleMode = ref(false)
   const repeatMode = ref<RepeatMode>('none')
   const shuffleOrder = ref<number[]>([])
-  // Position in shuffleOrder array
   const shufflePos = ref(0)
+  // Generation counter to prevent race conditions during track switching
+  const playGeneration = ref(0)
 
   const currentTrack = computed(() => tracks.value[currentIndex.value] ?? null)
 
   function generateShuffle() {
     shuffleOrder.value = fisherYates(tracks.value.length)
-    // Start from position that matches current index if possible
     const pos = shuffleOrder.value.indexOf(currentIndex.value)
     shufflePos.value = pos >= 0 ? pos : 0
   }
@@ -53,7 +53,6 @@ export const useAudioStore = defineStore('audio', () => {
     const n = tracks.value.length
     if (n === 0) return
     if (repeatMode.value === 'single') {
-      // keep index, just ensure playing
       return
     }
     if (shuffleMode.value) {
@@ -105,21 +104,31 @@ export const useAudioStore = defineStore('audio', () => {
     }
   }
 
-  // Error counter to prevent infinite skip loop when files are missing
-  const errorCount = ref(0)
+  // Error tracking: only reset on successful playback, not on timer
+  const consecutiveErrors = ref(0)
   const MAX_CONSECUTIVE_ERRORS = 3
+  const playbackStopped = ref(false)
 
   function onAudioError() {
-    errorCount.value++
-    if (errorCount.value <= MAX_CONSECUTIVE_ERRORS) {
+    consecutiveErrors.value++
+    if (consecutiveErrors.value >= MAX_CONSECUTIVE_ERRORS) {
+      isPlaying.value = false
+      playbackStopped.value = true
+      return
+    }
+    if (isPlaying.value) {
       next()
     }
-    // Reset error count after a delay
-    setTimeout(() => { errorCount.value = 0 }, 3000)
   }
 
-  function resetErrors() {
-    errorCount.value = 0
+  function onPlaybackSuccess() {
+    consecutiveErrors.value = 0
+    playbackStopped.value = false
+  }
+
+  function bumpGeneration(): number {
+    playGeneration.value++
+    return playGeneration.value
   }
 
   return {
@@ -131,6 +140,7 @@ export const useAudioStore = defineStore('audio', () => {
     repeatMode,
     shuffleOrder,
     shufflePos,
+    playGeneration,
     currentTrack,
     play,
     pause,
@@ -142,6 +152,9 @@ export const useAudioStore = defineStore('audio', () => {
     jumpTo,
     generateShuffle,
     onAudioError,
-    resetErrors,
+    onPlaybackSuccess,
+    bumpGeneration,
+    consecutiveErrors,
+    playbackStopped,
   }
 })

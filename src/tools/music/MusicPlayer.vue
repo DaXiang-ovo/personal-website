@@ -1,4 +1,4 @@
-﻿<script setup lang="ts">
+<script setup lang="ts">
 import { ref, watch, onMounted, onUnmounted, computed } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useAudioStore } from '../../stores/audio'
@@ -39,6 +39,40 @@ function cycleRepeat() {
   store.setRepeat(modes[(idx + 1) % modes.length])
 }
 
+// Centralized playback function — all track switching goes through here
+async function playTrack(index: number, shouldAutoPlay: boolean) {
+  const audio = audioRef.value
+  if (!audio) return
+
+  const gen = store.bumpGeneration()
+  isReady.value = false
+  currentTime.value = 0
+  duration.value = 0
+
+  store.jumpTo(index)
+  const track = store.tracks[index]
+  if (!track) return
+
+  audio.pause()
+  audio.src = track.src
+  audio.load()
+
+  if (shouldAutoPlay) {
+    try {
+      await audio.play()
+      // Check if we're still on the same generation (no other track switch happened)
+      if (store.playGeneration !== gen) return
+      store.play()
+      store.onPlaybackSuccess()
+    } catch (e: unknown) {
+      if (store.playGeneration !== gen) return
+      if (e instanceof DOMException && e.name === 'AbortError') return
+      // NotAllowedError = autoplay blocked by browser, just pause
+      store.pause()
+    }
+  }
+}
+
 function togglePlay() {
   const audio = audioRef.value
   if (!audio) return
@@ -46,7 +80,10 @@ function togglePlay() {
     audio.pause()
     store.pause()
   } else {
-    audio.play().then(() => store.play()).catch(() => {})
+    audio.play().then(() => {
+      store.play()
+      store.onPlaybackSuccess()
+    }).catch(() => {})
   }
 }
 
@@ -62,15 +99,20 @@ function seekTo(e: MouseEvent) {
 
 function handleEnded() {
   if (store.repeatMode === 'single') {
-    audioRef.value?.play().catch(() => {})
-  } else {
+    const audio = audioRef.value
+    if (audio) {
+      audio.currentTime = 0
+      audio.play().then(() => store.onPlaybackSuccess()).catch(() => {})
+    }
+  } else if (store.repeatMode === 'playlist' || store.currentIndex < store.tracks.length - 1) {
     store.next()
+  } else {
+    store.pause()
   }
 }
 
 function handleError() {
   isReady.value = false
-  // Only skip if not already at max errors - prevents infinite loop when files missing
   store.onAudioError()
 }
 
@@ -85,25 +127,14 @@ function handleLoadedMetadata() {
 
 function handleCanPlay() {
   isReady.value = true
+  store.onPlaybackSuccess()
 }
 
 // When track changes via store.next()/prev(), sync audio element
 watch(() => store.currentIndex, (newIdx, oldIdx) => {
   if (newIdx === oldIdx) return
-  const audio = audioRef.value
-  if (!audio) return
-  isReady.value = false
-  currentTime.value = 0
-  duration.value = 0
-  const track = store.currentTrack
-  if (track) {
-    audio.src = track.src
-    audio.load()
-    // Only auto-play if we were already playing (e.g. song ended → next)
-    if (store.isPlaying) {
-      audio.play().catch(() => {})
-    }
-  }
+  const wasPlaying = store.isPlaying
+  playTrack(newIdx, wasPlaying)
 })
 
 watch(() => store.volume, (v) => {
@@ -125,12 +156,7 @@ onUnmounted(() => {
   store.pause()
 })
 
-// Background blur color from cover
 const bgStyle = computed(() => {
-  const cover = store.currentTrack?.coverUrl
-  if (cover && !cover.includes('placeholder')) {
-    return `background: linear-gradient(135deg, #1A0A00 0%, #2A1200 50%, #1A0A00 100%);`
-  }
   return 'background: linear-gradient(135deg, #1A0A00 0%, #2A1200 50%, #1A0A00 100%);'
 })
 </script>
@@ -158,6 +184,11 @@ const bgStyle = computed(() => {
       <h1 class="text-center mb-8 text-xl font-semibold tracking-widest" style="color:#D4A96A;">
         🎵 陈奕迅 · 音乐播放器
       </h1>
+
+      <!-- Playback stopped warning -->
+      <div v-if="store.playbackStopped" class="text-center mb-4 px-4 py-2 rounded-lg border border-red-800/50 bg-red-900/30 text-red-400 text-sm">
+        多首歌曲加载失败，播放已停止。请检查音频文件是否存在。
+      </div>
 
       <div class="flex flex-col lg:flex-row gap-6">
 
@@ -206,12 +237,12 @@ const bgStyle = computed(() => {
 
           <!-- Main controls -->
           <div class="flex items-center gap-5">
-            <button @click="store.prev()" class="ctrl-btn" title="上一首" :disabled="!isReady">⏮</button>
+            <button @click="store.prev()" class="ctrl-btn" title="上一首">⏮</button>
             <button @click="togglePlay" class="ctrl-btn play-btn" :title="store.isPlaying ? '暂停' : '播放'">
-              <span v-if="!isReady" class="loading-dot" />
+              <span v-if="!isReady && store.isPlaying" class="loading-dot" />
               <span v-else>{{ store.isPlaying ? '⏸' : '▶' }}</span>
             </button>
-            <button @click="store.next()" class="ctrl-btn" title="下一首" :disabled="!isReady">⏭</button>
+            <button @click="store.next()" class="ctrl-btn" title="下一首">⏭</button>
           </div>
 
           <!-- Secondary controls -->
@@ -248,7 +279,7 @@ const bgStyle = computed(() => {
             <li
               v-for="(track, idx) in store.tracks"
               :key="track.id"
-              @click="() => { store.jumpTo(idx); const audio = audioRef; if(audio) { audio.src = store.tracks[idx].src; audio.load(); audio.play().then(() => store.play()).catch(() => {}); } }"
+              @click="playTrack(idx, true)"
               class="playlist-item px-3 py-2.5 cursor-pointer rounded-lg flex items-center gap-3"
               :class="{ 'playlist-active': idx === store.currentIndex }"
             >

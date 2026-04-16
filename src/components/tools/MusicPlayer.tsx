@@ -1,5 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import musicData from '../../data/music.json';
+import type { MetingSong } from '@lib/meting';
+import { resolvePlaylist } from '@lib/meting';
+import { bgmConfig } from '@constants/site-config';
 
 interface Track {
   id: string;
@@ -7,6 +10,11 @@ interface Track {
   album: string;
   coverUrl: string;
   src: string;
+}
+
+interface MusicData {
+  playlistUrl?: string;
+  tracks: Track[];
 }
 
 type RepeatMode = 'none' | 'single' | 'playlist';
@@ -20,8 +28,6 @@ function fisherYates(n: number): number[] {
   return arr;
 }
 
-const tracks: Track[] = musicData.tracks as Track[];
-
 export default function MusicPlayer() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -34,10 +40,68 @@ export default function MusicPlayer() {
   const [duration, setDuration] = useState(0);
   const [showPlaylist, setShowPlaylist] = useState(false);
   const [_consecutiveErrors, setConsecutiveErrors] = useState(0);
+  const [metingTracks, setMetingTracks] = useState<Track[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement>(null);
   const generationRef = useRef(0);
 
-  const currentTrack = tracks[currentIndex] ?? null;
+  // Use meting tracks if available, otherwise fallback to local tracks
+  const tracks = useMemo(
+    () => metingTracks.length > 0 ? metingTracks : musicData.tracks,
+    [metingTracks]
+  );
+  const currentTrack = useMemo(
+    () => tracks[currentIndex] ?? null,
+    [tracks, currentIndex]
+  );
+
+  // Fetch NetEase Cloud Music playlist if playlistUrl is provided
+  useEffect(() => {
+    const playlistUrl = musicData.playlistUrl;
+    if (!playlistUrl) return;
+
+    const fetchPlaylist = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const metingApi = bgmConfig.metingApi || 'https://163.hyc.moe/';
+        const metingSongs = await resolvePlaylist([playlistUrl], metingApi);
+
+        if (metingSongs.length === 0) {
+          throw new Error('No songs found in playlist');
+        }
+
+        // Map MetingSong to Track format
+        const mappedTracks: Track[] = metingSongs.map((song, index) => ({
+          id: song.id || String(index + 1),
+          title: song.name || `Track ${index + 1}`,
+          album: song.artist || '',
+          coverUrl: song.pic || musicData.tracks[index]?.coverUrl || '/images/eason-cover.jpg',
+          src: song.url || '',
+        }));
+
+        // Filter out tracks without audio URL
+        const validTracks = mappedTracks.filter(track => track.src);
+        if (validTracks.length === 0) {
+          throw new Error('No valid audio URLs found in playlist');
+        }
+
+        setMetingTracks(validTracks);
+        // Reset to first track if current index is out of bounds
+        if (currentIndex >= validTracks.length) {
+          setCurrentIndex(0);
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to load playlist');
+        console.error('Failed to fetch playlist:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPlaylist();
+  }, []); // Run only on mount
 
   const generateShuffle = useCallback((idx: number) => {
     const order = fisherYates(tracks.length);
@@ -45,7 +109,7 @@ export default function MusicPlayer() {
     const pos = order.indexOf(idx);
     setShufflePos(pos >= 0 ? pos : 0);
     return order;
-  }, []);
+  }, [tracks.length]);
 
   const goNext = useCallback(() => {
     if (tracks.length === 0) return;
@@ -60,7 +124,7 @@ export default function MusicPlayer() {
     } else {
       setCurrentIndex(prev => (prev + 1) % n);
     }
-  }, [repeatMode, shuffleMode, shuffleOrder, shufflePos, currentIndex, generateShuffle]);
+  }, [repeatMode, shuffleMode, shuffleOrder, shufflePos, currentIndex, generateShuffle, tracks.length]);
 
   const goPrev = useCallback(() => {
     if (tracks.length === 0) return;
@@ -75,7 +139,7 @@ export default function MusicPlayer() {
     } else {
       setCurrentIndex(prev => (prev - 1 + n) % n);
     }
-  }, [repeatMode, shuffleMode, shuffleOrder, shufflePos, currentIndex, generateShuffle]);
+  }, [repeatMode, shuffleMode, shuffleOrder, shufflePos, currentIndex, generateShuffle, tracks.length]);
 
   // Play/pause effect
   useEffect(() => {
@@ -90,7 +154,7 @@ export default function MusicPlayer() {
         if (gen === generationRef.current) setIsPlaying(false);
       });
     }
-  }, [currentIndex]);
+  }, [currentIndex, currentTrack]);
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -199,6 +263,30 @@ export default function MusicPlayer() {
           <h2 className="text-xl font-bold text-white truncate">{currentTrack?.title ?? '未知曲目'}</h2>
           <p className="text-sm text-white/50 mt-1">{currentTrack?.album ?? ''}</p>
         </div>
+
+        {/* Loading/error state */}
+        {loading && (
+          <div className="text-center mb-4">
+            <div className="inline-flex items-center gap-2 text-sm text-purple-300">
+              <div className="w-4 h-4 border-2 border-purple-300 border-t-transparent rounded-full animate-spin"></div>
+              正在加载网易云音乐播放列表...
+            </div>
+          </div>
+        )}
+        {error && (
+          <div className="text-center mb-4">
+            <div className="inline-flex items-center gap-2 text-sm text-red-300 bg-red-900/30 px-4 py-2 rounded-lg">
+              <span>⚠️</span>
+              <span>播放列表加载失败: {error}</span>
+              <button
+                onClick={() => window.location.reload()}
+                className="ml-2 text-xs text-red-200 hover:text-white underline"
+              >
+                重试
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Progress bar */}
         <div className="mb-4">

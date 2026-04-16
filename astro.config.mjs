@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import react from '@astrojs/react';
 import sitemap from '@astrojs/sitemap';
+import vercel from '@astrojs/vercel/static';
 import yaml from '@rollup/plugin-yaml';
 import tailwindcss from '@tailwindcss/vite';
 import umami from '@yeskunall/astro-umami';
@@ -168,6 +169,8 @@ if (contentConfig.enableCodeMeta !== false) shikiTransformers.push(shokaMetaTran
 
 // https://astro.build/config
 export default defineConfig({
+  adapter: vercel(),
+  output: 'static',
   site: yamlConfig.site.url,
   compressHTML: true,
   markdown: {

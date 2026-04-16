@@ -23,7 +23,7 @@ dist-ssr
 *.sln
 *.sw?
 
-# Music files - too large for GitHub (serve locally or via CDN)
+# Music files - too large for Vercel (serve locally or via CDN)
 public/music/
 
 .vercel

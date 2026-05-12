@@ -1,0 +1,88 @@
+---
+import { CONTENT_PADDING } from '@constants/layout';
+import { siteConfig } from '@constants/site-config';
+import Layout from '@layouts/Layout.astro';
+
+const title = `DataVision | ${siteConfig.title}`;
+const description = 'DataEase 嵌入式仪表板展示';
+
+const DE_BASE_URL = 'http://120.26.31.230:9080/';
+const DE_DV_ID = '1247187068585644032';
+const DE_APP_ID = 'rJkK3tjsEAAhEgfl';
+const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
+---
+
+<Layout title={title} description={description}>
+  <div class={`bg-gradient-start shadow-box tablet:shadow-none flex flex-col overflow-hidden ${CONTENT_PADDING.standard}`}>
+    <h1 class="text-2xl font-bold mb-2">DataVision</h1>
+    <p class="text-sm text-[var(--text-color-secondary)] mb-4">DataEase 嵌入式仪表板展示</p>
+    <div id="bi-status" class="mb-3 text-sm text-[var(--text-color-secondary)]">
+      <span>正在加载仪表板...</span>
+    </div>
+    <div id="bi-container" style="width: 100%; min-height: 600px;"></div>
+  </div>
+</Layout>
+
+<script type="module" crossorigin src={`${DE_BASE_URL}js/panel-0.0.0-dataease.js`}>
+</script>
+
+<script define:vars={{ DE_APP_ID, DE_APP_SECRET, DE_BASE_URL, DE_DV_ID }}>
+  function b64url(str) {
+    return btoa(str).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+  }
+
+  async function generateToken(appId, appSecret, payload) {
+    var header = { alg: 'HS256', typ: 'JWT' };
+    var headerB64 = b64url(JSON.stringify(header));
+    var payloadB64 = b64url(JSON.stringify(payload));
+    var data = headerB64 + '.' + payloadB64;
+    var encoder = new TextEncoder();
+    var key = await crypto.subtle.importKey('raw', encoder.encode(appSecret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    var sig = await crypto.subtle.sign('HMAC', key, encoder.encode(data));
+    var sigBytes = new Uint8Array(sig);
+    var sigChars = [];
+    for (var i = 0; i < sigBytes.length; i++) sigChars.push(String.fromCharCode(sigBytes[i]));
+    return data + '.' + b64url(sigChars.join(''));
+  }
+
+  (function () {
+    var statusEl = document.getElementById('bi-status');
+    var container = document.getElementById('bi-container');
+    if (!statusEl || !container) return;
+
+    function setStatus(text, isError) {
+      var span = statusEl.querySelector('span');
+      if (span) span.textContent = text;
+      if (isError) statusEl.style.color = '#ef4444';
+    }
+
+    function waitForBi(maxWait) {
+      maxWait = maxWait || 15000;
+      return new Promise(function (resolve, reject) {
+        var start = Date.now();
+        (function check() {
+          if (typeof window.DataEaseBi !== 'undefined') return resolve();
+          if (Date.now() - start > maxWait) return reject(new Error('SDK 加载超时'));
+          setTimeout(check, 200);
+        })();
+      });
+    }
+
+    waitForBi()
+      .then(function () {
+        setStatus('正在生成令牌...');
+        var now = Math.floor(Date.now() / 1000);
+        return generateToken(DE_APP_ID, DE_APP_SECRET, { uid: 1, oid: 1, appId: DE_APP_ID, account: 'admin', exp: now + 960 * 60 });
+      })
+      .then(function (token) {
+        setStatus('正在渲染仪表板...');
+        var bi = new window.DataEaseBi('Dashboard', { baseUrl: DE_BASE_URL, token: token, dvId: DE_DV_ID, busiFlag: 'dashboard' });
+        return bi.initialize({ container: '#bi-container', lng: 'zh' });
+      })
+      .then(function () { setStatus(''); })
+      .catch(function (err) {
+        setStatus('加载失败: ' + (err && err.message || err), true);
+        console.error('DataEase embed error:', err);
+      });
+  })();
+</script>

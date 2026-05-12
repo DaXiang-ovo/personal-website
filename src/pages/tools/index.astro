@@ -15,6 +15,7 @@ const tools = [
   { title: '三角洲行动', href: '/tools/deltaforce', desc: '个人战绩展示', color: '#00FF41', iconType: 'deltaforce' },
   { title: '火影忍者手游', href: '/tools/naruto', desc: '战绩与战力展示', color: '#FF6B00', iconType: 'naruto' },
   { title: '坦克世界欧服', href: '/tools/wot', desc: '欧服战绩查询', color: '#F59E0B', iconType: 'wot' },
+  { title: 'DataVision', href: '/tools/bi', desc: 'DataEase 嵌入式仪表板', color: '#3B82F6', iconType: 'bi' },
 ];
 ---
 
@@ -41,6 +42,9 @@ const tools = [
               )}
               {tool.iconType === 'wot' && (
                 <img src="/img/tools/wot.png" alt="坦克世界" class="w-10 h-10 rounded-lg" />
+              )}
+              {tool.iconType === 'bi' && (
+                <div class="w-10 h-10 rounded-lg bg-blue-500/20 flex items-center justify-center text-xl">📊</div>
               )}
             </div>
             <div>

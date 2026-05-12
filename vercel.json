@@ -1,3 +1,8 @@
 {
-  "framework": "astro"
+  "framework": "astro",
+  "rewrites": [
+    { "source": "/js/:path*", "destination": "http://120.26.31.230:9080/js/:path*" },
+    { "source": "/assets/:path*", "destination": "http://120.26.31.230:9080/assets/:path*" },
+    { "source": "/de2api/:path*", "destination": "http://120.26.31.230:9080/de2api/:path*" }
+  ]
 }

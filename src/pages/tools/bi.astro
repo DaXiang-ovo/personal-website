@@ -19,11 +19,11 @@ const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
     <div id="bi-status" class="mb-3 text-sm text-[var(--text-color-secondary)]">
       <span>正在加载仪表板...</span>
     </div>
-    <div id="bi-container" style="width: 100%; min-height: 600px;"></div>
+    <div id="bi-container" style="width: 100%; min-height: 800px; height: calc(100vh - 200px);"></div>
   </div>
 </Layout>
 
-<script type="module" crossorigin src={`${DE_BASE_URL}js/panel-0.0.0-dataease.js`}>
+<script type="module" crossorigin src={`${DE_BASE_URL}js/div_import_0.0.0-dataease.js`}>
 </script>
 
 <script define:vars={{ DE_APP_ID, DE_APP_SECRET, DE_BASE_URL, DE_DV_ID }}>
@@ -45,7 +45,7 @@ const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
     return data + '.' + b64url(sigChars.join(''));
   }
 
-  (function () {
+  window.addEventListener('load', function () {
     var statusEl = document.getElementById('bi-status');
     var container = document.getElementById('bi-container');
     if (!statusEl || !container) return;
@@ -76,20 +76,19 @@ const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
       })
       .then(function (token) {
         setStatus('正在渲染仪表板...');
-        var bi = new window.DataEaseBi('Dashboard', { baseUrl: DE_BASE_URL, token: token, dvId: DE_DV_ID, busiFlag: 'dashboard' });
-        return bi.initialize({ container: '#bi-container', lng: 'zh' });
-      })
-      .then(function () {
+        var bi = new window.DataEaseBi('Dashboard', {
+          baseUrl: DE_BASE_URL,
+          token: token,
+          dvId: DE_DV_ID,
+          busiFlag: 'dashboard',
+          outerParams: ''
+        });
+        bi.initialize({ container: '#bi-container' });
         setStatus('');
-        // Fix: DataEase embedded SDK chart race condition
-        // Trigger resize to force chart re-layout after containers are created
-        setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 500);
-        setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 1500);
-        setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 3000);
       })
       .catch(function (err) {
         setStatus('加载失败: ' + (err && err.message || err), true);
         console.error('DataEase embed error:', err);
       });
-  })();
+  });
 </script>

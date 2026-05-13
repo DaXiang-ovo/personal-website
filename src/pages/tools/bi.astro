@@ -1,7 +1,6 @@
 ---
-import { CONTENT_PADDING } from '@constants/layout';
+import BiLayout from '@layouts/BiLayout.astro';
 import { siteConfig } from '@constants/site-config';
-import Layout from '@layouts/Layout.astro';
 
 const title = `DataVision | ${siteConfig.title}`;
 const description = 'DataEase 嵌入式仪表板展示';
@@ -12,16 +11,16 @@ const DE_APP_ID = 'rJkK3tjsEAAhEgfl';
 const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
 ---
 
-<Layout title={title} description={description}>
-  <div class={`bg-gradient-start shadow-box tablet:shadow-none flex flex-col ${CONTENT_PADDING.standard}`}>
-    <div id="bi-header" class="flex items-center justify-between mb-2">
-      <span id="bi-status" class="text-xs px-2 py-0.5 rounded-full loading" style="background: rgba(245,158,11,0.15); color: #f59e0b;">
-        正在加载仪表板...
-      </span>
-    </div>
-    <div id="bi-container" style="width: 100%; height: calc(100vh - 90px); position: relative;"></div>
+<BiLayout title={title} description={description}>
+  <!-- 轻量加载指示器 -->
+  <div id="bi-loading" style="position:fixed;top:12px;left:16px;z-index:99999;
+    font-size:12px;padding:2px 10px;border-radius:10px;
+    background:rgba(0,0,0,0.65);color:#fff;pointer-events:none;">
+    正在加载仪表板...
   </div>
-</Layout>
+  <!-- DataEase 嵌入容器 — 全屏 -->
+  <div id="bi-container" style="width:100vw;height:100vh;"></div>
+</BiLayout>
 
 <link rel="stylesheet" crossorigin href={`${DE_BASE_URL}assets/css/style-0.0.0-dataease.css`} />
 <script type="module" crossorigin src={`${DE_BASE_URL}js/panel-0.0.0-dataease.js`}>
@@ -38,7 +37,8 @@ const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
     var payloadB64 = b64url(JSON.stringify(payload));
     var data = headerB64 + '.' + payloadB64;
     var encoder = new TextEncoder();
-    var key = await crypto.subtle.importKey('raw', encoder.encode(appSecret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    var key = await crypto.subtle.importKey('raw', encoder.encode(appSecret),
+      { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
     var sig = await crypto.subtle.sign('HMAC', key, encoder.encode(data));
     var sigBytes = new Uint8Array(sig);
     var sigChars = [];
@@ -46,42 +46,44 @@ const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
     return data + '.' + b64url(sigChars.join(''));
   }
 
-  window.addEventListener('load', function () {
-    var statusEl = document.getElementById('bi-status');
-    var container = document.getElementById('bi-container');
-    if (!statusEl || !container) return;
+  function waitForBi(maxWait) {
+    maxWait = maxWait || 15000;
+    return new Promise(function (resolve, reject) {
+      var start = Date.now();
+      (function check() {
+        if (typeof window.DataEaseBi !== 'undefined') return resolve();
+        if (Date.now() - start > maxWait) return reject(new Error('SDK 加载超时'));
+        setTimeout(check, 200);
+      })();
+    });
+  }
 
-    function setStatus(text, isError) {
-      statusEl.textContent = text;
-      if (isError) {
-        statusEl.style.background = 'rgba(239,68,68,0.15)';
-        statusEl.style.color = '#ef4444';
-      } else {
-        statusEl.style.background = 'rgba(16,185,129,0.1)';
-        statusEl.style.color = '#10b981';
+  window.addEventListener('load', function () {
+    var loadingEl = document.getElementById('bi-loading');
+    var container = document.getElementById('bi-container');
+
+    function done(msg) {
+      if (loadingEl) {
+        loadingEl.textContent = msg || '✓';
+        setTimeout(function () { loadingEl.style.display = 'none'; }, 1500);
       }
     }
 
-    function waitForBi(maxWait) {
-      maxWait = maxWait || 15000;
-      return new Promise(function (resolve, reject) {
-        var start = Date.now();
-        (function check() {
-          if (typeof window.DataEaseBi !== 'undefined') return resolve();
-          if (Date.now() - start > maxWait) return reject(new Error('SDK 加载超时'));
-          setTimeout(check, 200);
-        })();
-      });
+    function fail(msg) {
+      if (loadingEl) {
+        loadingEl.textContent = msg;
+        loadingEl.style.background = 'rgba(220,38,38,0.85)';
+      }
     }
 
     waitForBi()
       .then(function () {
-        setStatus('正在生成令牌...');
         var now = Math.floor(Date.now() / 1000);
-        return generateToken(DE_APP_ID, DE_APP_SECRET, { uid: 1, oid: 1, appId: DE_APP_ID, account: 'admin', exp: now + 960 * 60 });
+        return generateToken(DE_APP_ID, DE_APP_SECRET, {
+          uid: 1, oid: 1, appId: DE_APP_ID, account: 'admin', exp: now + 960 * 60
+        });
       })
       .then(function (token) {
-        setStatus('正在渲染...');
         var bi = new window.DataEaseBi('Dashboard', {
           baseUrl: DE_BASE_URL,
           token: token,
@@ -89,13 +91,10 @@ const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
           busiFlag: 'dashboard'
         });
         bi.initialize({ container: '#bi-container' });
-        setTimeout(function () {
-          var header = document.getElementById('bi-header');
-          if (header) header.style.display = 'none';
-        }, 3000);
+        done('仪表板已加载');
       })
       .catch(function (err) {
-        setStatus('加载失败: ' + (err && err.message || err), true);
+        fail('加载失败: ' + (err && err.message || err));
         console.error('DataEase embed error:', err);
       });
   });

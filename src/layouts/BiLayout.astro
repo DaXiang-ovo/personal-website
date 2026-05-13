@@ -1,0 +1,77 @@
+---
+// Minimal layout for DataEase embedded dashboard — no header, nav, sidebar, or overlays
+import { seoConfig } from '@constants/site-config';
+import { SEO } from 'astro-seo';
+import { getOgImageUrl } from '@lib/seo/og-image';
+import {
+  defaultLocale,
+  getAlternateUrl,
+  getHtmlLang,
+  getLocaleFromUrl,
+  localeList,
+  localizedPath,
+} from '@/i18n';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const {
+  title = seoConfig.title,
+  description = seoConfig.description,
+} = Astro.props;
+
+const locale = getLocaleFromUrl(Astro.url.pathname);
+const htmlLang = getHtmlLang(locale);
+const ogImage = getOgImageUrl(undefined, Astro.site);
+const canonicalHref = Astro.url.href;
+
+const rssHref = new URL(localizedPath('/rss.xml', locale), Astro.site).href;
+const hreflangLinks = localeList.map((loc) => ({
+  lang: getHtmlLang(loc),
+  href: new URL(getAlternateUrl(Astro.url.pathname, loc), Astro.site).href,
+}));
+const xDefaultHref = new URL(getAlternateUrl(Astro.url.pathname, defaultLocale), Astro.site).href;
+---
+
+<!doctype html>
+<html lang={htmlLang}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
+    <meta name="generator" content={Astro.generator} />
+
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
+    <link rel="preconnect" href="https://chinese-font.netlify.app" crossorigin />
+    <link rel="dns-prefetch" href="https://chinese-font.netlify.app" />
+
+    <link rel="stylesheet" href="/fonts/ChillRoundFRegular/result.css" media="print" onload="this.setAttribute('media','all')" />
+    <link rel="stylesheet" href="/fonts/ChillRoundFBold/result.css" media="print" onload="this.setAttribute('media','all')" />
+
+    <SEO
+      title={title}
+      description={description}
+      canonical={canonicalHref}
+      openGraph={{
+        basic: {
+          title,
+          type: 'website',
+          image: ogImage,
+        },
+      }}
+    />
+
+    <link rel="alternate" type="application/rss+xml" title="RSS" href={rssHref} />
+    {hreflangLinks.map(({ lang, href }) => (
+      <link rel="alternate" hreflang={lang} href={href} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={xDefaultHref} />
+    <slot name="head" />
+  </head>
+  <body style="margin:0;padding:0;overflow:hidden;width:100vw;height:100vh;">
+    <slot />
+  </body>
+</html>

@@ -1,9 +1,8 @@
 ---
-import { CONTENT_PADDING } from '@constants/layout';
+import BiLayout from '@layouts/BiLayout.astro';
 import { siteConfig } from '@constants/site-config';
-import Layout from '@layouts/Layout.astro';
 
-const title = `DataVision (iframe) | ${siteConfig.title}`;
+const title = `DataVision | ${siteConfig.title}`;
 const description = 'DataEase 嵌入式仪表板展示 — iframe 方式';
 
 const DE_BASE_URL = 'https://spell-dig-marsh-somewhere.trycloudflare.com';
@@ -12,17 +11,14 @@ const DE_APP_ID = 'rJkK3tjsEAAhEgfl';
 const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
 ---
 
-<Layout title={title} description={description}>
-  <div class={`bg-gradient-start shadow-box tablet:shadow-none flex flex-col ${CONTENT_PADDING.standard}`}>
-    <div class="flex items-center justify-between mb-2">
-      <span id="bi-status" class="text-xs px-2 py-0.5 rounded-full" style="background: rgba(245,158,11,0.15); color: #f59e0b;">
-        正在加载仪表板...
-      </span>
-      <a href="/tools/bi" class="text-xs underline text-[var(--text-color-secondary)]">切回 DIV 嵌入</a>
-    </div>
-    <iframe id="de-view-iframe" style="width: 100%; height: calc(100vh - 90px); border: 0;" src="about:blank" />
+<BiLayout title={title} description={description}>
+  <div id="bi-loading" style="position:fixed;top:12px;left:16px;z-index:99999;
+    font-size:12px;padding:2px 10px;border-radius:10px;
+    background:rgba(0,0,0,0.65);color:#fff;pointer-events:none;">
+    正在加载仪表板...
   </div>
-</Layout>
+  <iframe id="de-view-iframe" style="width:100vw;height:100vh;border:0;" src="about:blank" />
+</BiLayout>
 
 <script define:vars={{ DE_APP_ID, DE_APP_SECRET, DE_BASE_URL, DE_DV_ID }}>
   function b64url(str) {
@@ -35,7 +31,8 @@ const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
     var payloadB64 = b64url(JSON.stringify(payload));
     var data = headerB64 + '.' + payloadB64;
     var encoder = new TextEncoder();
-    var key = await crypto.subtle.importKey('raw', encoder.encode(appSecret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    var key = await crypto.subtle.importKey('raw', encoder.encode(appSecret),
+      { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
     var sig = await crypto.subtle.sign('HMAC', key, encoder.encode(data));
     var sigBytes = new Uint8Array(sig);
     var sigChars = [];
@@ -44,41 +41,54 @@ const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
   }
 
   window.addEventListener('load', async function () {
-    var statusEl = document.getElementById('bi-status');
+    var loadingEl = document.getElementById('bi-loading');
     var iframe = document.getElementById('de-view-iframe');
-    if (!statusEl || !iframe) return;
 
-    function setStatus(text, isError) {
-      statusEl.textContent = text;
-      if (isError) {
-        statusEl.style.background = 'rgba(239,68,68,0.15)';
-        statusEl.style.color = '#ef4444';
-      } else {
-        statusEl.style.background = 'rgba(16,185,129,0.1)';
-        statusEl.style.color = '#10b981';
+    function done(msg) {
+      if (loadingEl) {
+        loadingEl.textContent = msg || '✓';
+        setTimeout(function () { loadingEl.style.display = 'none'; }, 1500);
+      }
+    }
+
+    function fail(msg) {
+      if (loadingEl) {
+        loadingEl.textContent = msg;
+        loadingEl.style.background = 'rgba(220,38,38,0.85)';
       }
     }
 
     try {
-      setStatus('正在生成令牌...');
       var now = Math.floor(Date.now() / 1000);
       var token = await generateToken(DE_APP_ID, DE_APP_SECRET, {
         uid: 1, oid: 1, appId: DE_APP_ID, account: 'admin', exp: now + 960 * 60
       });
 
-      setStatus('正在加载...');
-      // URL token 方式：将 embeddedToken 拼在 hash query 中
-      var viewUrl = DE_BASE_URL + '/#/chart-view?busiFlag=dashboard&dvId=' + DE_DV_ID
-        + '&type=Dashboard&embeddedToken=' + encodeURIComponent(token);
+      // 匹配官方 iframe/DashboardView.html 的消息握手协议
+      var viewUrl = DE_BASE_URL + '/#/chart-view';
       iframe.src = viewUrl;
 
-      setStatus('仪表板已加载');
-      setTimeout(function () {
-        var header = iframe.parentElement?.querySelector('.flex.items-center.justify-between');
-        if (header) header.style.display = 'none';
-      }, 3000);
+      var authParams = {
+        busiFlag: 'dashboard',
+        dvId: DE_DV_ID,
+        type: 'Dashboard',
+        embeddedToken: token
+      };
+
+      window.addEventListener('message', function (event) {
+        if (event.data?.eventName === 'canvas_init_ready') {
+          console.log('iframe canvas_init_ready');
+        } else if (event.data?.msgOrigin === 'de-fit2cloud') {
+          // DataEase iframe 握手：收到 de-fit2cloud 后回复 auth
+          console.log('iframe de-fit2cloud → sending auth');
+          authParams['de-embedded'] = true;
+          iframe.contentWindow.postMessage(authParams, DE_BASE_URL + '/');
+        }
+      });
+
+      done('仪表板已加载');
     } catch (err) {
-      setStatus('加载失败: ' + (err && err.message || err), true);
+      fail('加载失败: ' + (err && err.message || err));
       console.error('DataEase iframe error:', err);
     }
   });

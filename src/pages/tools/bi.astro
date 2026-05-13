@@ -79,7 +79,14 @@ const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
         var bi = new window.DataEaseBi('Dashboard', { baseUrl: DE_BASE_URL, token: token, dvId: DE_DV_ID, busiFlag: 'dashboard' });
         return bi.initialize({ container: '#bi-container', lng: 'zh' });
       })
-      .then(function () { setStatus(''); })
+      .then(function () {
+        setStatus('');
+        // Fix: DataEase embedded SDK chart race condition
+        // Trigger resize to force chart re-layout after containers are created
+        setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 500);
+        setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 1500);
+        setTimeout(function () { window.dispatchEvent(new Event('resize')); }, 3000);
+      })
       .catch(function (err) {
         setStatus('加载失败: ' + (err && err.message || err), true);
         console.error('DataEase embed error:', err);

@@ -73,10 +73,14 @@ const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
 
       window.addEventListener('message', function (event) {
         if (event.data?.eventName === 'canvas_init_ready') {
-          console.log('iframe canvas_init_ready, sending auth params');
-          iframe.contentWindow.postMessage(authParams, DE_BASE_URL + '/');
+          console.log('iframe canvas_init_ready');
         } else if (event.data?.eventName === 'de_inner_params') {
           console.log('DataEase inner params:', JSON.stringify(event.data));
+        } else if (event.data?.msgOrigin === 'de-fit2cloud') {
+          // DataEase iframe 握手：收到 de-fit2cloud 后回复 auth 参数
+          console.log('iframe de-fit2cloud handshake, sending auth');
+          authParams['de-embedded'] = true;
+          iframe.contentWindow.postMessage(authParams, DE_BASE_URL + '/');
         }
       });
 

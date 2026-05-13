@@ -19,7 +19,18 @@ const DE_APP_SECRET = import.meta.env.DE_APP_SECRET || '04eYYEuUdVlAGrN1';
     <div id="bi-status" class="mb-3 text-sm text-[var(--text-color-secondary)]">
       <span>正在加载仪表板...</span>
     </div>
-    <div id="bi-container" style="width: 100%; min-height: 800px; height: calc(100vh - 200px);"></div>
+    <div id="bi-container" style="width: 100%; min-height: 800px; height: calc(100vh - 200px); position: relative; overflow: hidden;"></div>
+    <style>
+      /* 隐藏 DataEase 嵌入面板的标题栏，避免与页面 UI 重叠 */
+      #bi-container [class*="title-bar"],
+      #bi-container [class*="panel-header"],
+      #bi-container [class*="subtitle"],
+      #bi-container [class*="toolbar"],
+      #bi-container [class*="breadcrumb"],
+      #bi-container [class*="header"] {
+        display: none !important;
+      }
+    </style>
   </div>
 </Layout>
 
